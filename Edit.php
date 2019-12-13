@@ -17,9 +17,35 @@
 
 <body>
 	<?php 
+	    if (!isset($_GET['password']) || $_GET['password'] != "GEHEIM"){
+	die("Passwort incorrect");
+}
 	include('config.php');
 	 $link = mysqli_connect("localhost", "root", "", "phrases");
-	
+	  if (isset($_GET['delete-id'])){
+    $db_query = "DELETE FROM `phrases` WHERE `ID` = " . $_GET['delete-id'] ;
+    $delete_result = $link->query($db_query); 	
+	// The following line shows how many rows were delted...
+	// Can be used for error handling...
+	// echo $link->affected_rows;
+  // initialize variable $update_result
+  $update_result = 0;
+  if (isset($_GET['btn-save'])){
+    $db_query = "UPDATE `phrases` SET `text` = '" . $_GET['phrase'] . "' WHERE `ID` = " . $_GET['edit-id'] ;
+ 	// echo $db_query;
+     $update_result = $link->query($db_query); 	
+	  
+  }
+
+  }
+  $db_query = "SELECT * FROM `phrases` WHERE `ID` = " . $_GET['edit-id'] ;
+  $result = $link->query($db_query);
+  $row = mysqli_fetch_row($result);
+  $text = $row[1];
+
+  // query database
+  $result = $link->query('SELECT * FROM phrases');
+
 	
 	   if(isset($_GET['btn-save'])){
 	     $name = $_GET['name'];
@@ -43,18 +69,25 @@
 		   
   }
 	   
-  /*   $stmt = "SELECT * FROM `phrases`";
+     $stmt = "SELECT * FROM `phrases`";
   $result = $link->query($stmt);
 
-  if ($result->num_rows > 0){
+ /* if ($result->num_rows > 0){
     while ($row = mysqli_fetch_row($result)){
-        echo $row[0];
-        echo $row[1];
-    }                
+	echo "<tr>";
+	echo "<td>" . $row[0] . "</td>";
+	echo "<td>" . $row[1] . "</td>";
+	echo "<td>" . $row[2] . "</td>";
+	echo "<td><a href='?delete-id=" . $row[0] . "'>delete</a></td>";
+	echo "</tr>";
+}
+               
   }
+  
   else {
     // nothing found :-(
-  }*/
+  }
+  */
 
       if (isset($_GET['email'])){
       $to      = urldecode($_GET['email']);
@@ -113,6 +146,7 @@ $mailfun = true;
   </nav>
 
   <!-- Page Content -->
+	 <h1>Admin</h1>
   <div class="container">
     <div class="row">
       <div class="col-lg-12 text-center">
@@ -131,20 +165,12 @@ $mailfun = true;
         ?>
 	
 	<h1>says YES! to:</h1>
-    <select class="custom-select" name="phrase_01">
-        <option selected>Open this select menu</option>
-        <option value="learning">learning</option>
-        <option value="exploring">exploring</option>
-        <option value="finding">finding</option>
-	 	<option value="enjoying">enjoying</option>
-    </select>
-		<select class="custom-select" name="phrase_02">
-        <option selected>Open this select menu</option>
-        <option value="math">math</option>
-        <option value="the world">the world</option>
-        <option value="nemo">nemo</option>
-	 	<option value="nature">nature</option>
-    </select>
+       <form>
+           <input type="hidden" name="edit-id" value="<?php echo $_GET['edit-id']?>" >
+		   <input type="text" name="phrase" value=$text""></input>
+            	<button type="submit" name="btn-save" value="1">Update</button>            	
+            </form>
+		  
    <button type="submit" class="btn btn-default" name="btn-save" value="1">Say YES!</button>
 		
    <table class="table-striped table">
@@ -160,14 +186,16 @@ $mailfun = true;
             echo "<tr>\n";
             echo "<td>" . $row[0] . "</td>\n";
             echo "<td>" . $row[1] . "</td>\n";
-			//delte funktion
-				//echo "<td><a ref  delete /a></td>\n";	
-            echo "</tr>";
+			echo "<td>" . $row[2] . "</td>";
+			echo "<td><a href='?delete-id=" . $row[3] . "'>delete</a></td>";
+			echo "<td><a href='Edit.php?edit-id=" . $row[4] . "'>edit</a></td>";
+			echo "</tr>";
             }
         }
         else {
             echo "<tr><td colspan='2'>No data found</td></tr>";
-        }
+		
+			
         ?>
     </table>
 
@@ -182,5 +210,12 @@ $mailfun = true;
   <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 </body>
+ <?php if ($update_result == 1){ ?>
+          <div class="alert alert-primary" role="alert">
+            Update Success!
+            <a href="index.php">Back to dashboard</a>
+          </div>
+        <?php } ?>
+
 
 </html>
